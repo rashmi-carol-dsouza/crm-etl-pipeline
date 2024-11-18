@@ -14,4 +14,4 @@ COPY . /app
 RUN poetry install
 
 # Run the script
-CMD ["poetry", "run", "python", "extract_data.py"]
+CMD ["poetry", "run", "python", "scripts/main.py"]
