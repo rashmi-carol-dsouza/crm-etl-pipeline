@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "crm-etl-pipeline"
+version = "0.1.0"
+description = "Data ETL pipeline for extracting and processing Freshsales CRM data"
+authors = ["rashmi-carol-dsouza <hello@rashmidsouza.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11"  
+requests = "^2.28"
+python-dotenv = "^0.21"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
