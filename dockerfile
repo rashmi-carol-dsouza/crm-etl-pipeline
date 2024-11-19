@@ -14,4 +14,4 @@ COPY . /app
 RUN poetry install
 
 # Run the script
-CMD ["poetry", "run", "python", "scripts/main.py"]
+CMD ["poetry", "run", "python", "pipeline-scripts/main.py"]
