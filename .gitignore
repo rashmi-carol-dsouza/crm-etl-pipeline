@@ -1,4 +1,7 @@
 .env
 .dockerignore
 poetry.lock
-/data
+pipeline-scripts/data
+__pycache__
+experiment-scripts/experiment/data
+data/
