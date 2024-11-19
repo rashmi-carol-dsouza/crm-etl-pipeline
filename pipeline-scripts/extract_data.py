@@ -13,7 +13,14 @@ def extract_data(entity, view_id, output_dir):
     all_data = []
 
     while True:
-        url = f"https://{SALES_BUNDLE_ALIAS}/api/{entity}/view/{view_id}?page={page}"
+        # Modify the URL to include contacts or sales accounts where necessary
+        include_param = ''
+        if entity == "sales_accounts":
+            include_param = "&include=contacts"
+        elif entity == "deals":
+            include_param = "&include=sales_account"
+
+        url = f"https://{SALES_BUNDLE_ALIAS}/api/{entity}/view/{view_id}?page={page}{include_param}"
         headers = {
             "Authorization": f"Token token={FRESHSALES_API_KEY}",
             "Content-Type": "application/json"
@@ -37,5 +44,3 @@ def extract_data(entity, view_id, output_dir):
     with open(output_file, "w") as file:
         json.dump(all_data, file)
     print(f"Successfully extracted data for {entity} to {output_file}")
-
-extract_data("contacts", os.getenv('ALL_CONTACTS_VIEW_ID'), os.getenv('OUTPUT_DIR'))
