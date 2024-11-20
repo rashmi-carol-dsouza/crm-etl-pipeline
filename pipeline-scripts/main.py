@@ -1,13 +1,16 @@
+import sqlalchemy
 import os
 from dotenv import load_dotenv
-from extract_data import extract_data
+from extract_data import extract_data, extract_sales_accounts
 from transform import load_data_from_files, transform_data
 from calculate_aggregations import calculate_aggregates, generate_contacts_per_account
+from load import load_dataframe_to_postgres
 
 
 load_dotenv()
 
 if __name__ == "__main__":
+    print("Loading env variables")
     # Load environment variables
     ALL_CONTACTS_VIEW_ID = os.getenv('ALL_CONTACTS_VIEW_ID')
     ALL_ACCOUNTS_VIEW_ID = os.getenv('ALL_ACCOUNTS_VIEW_ID')
@@ -19,25 +22,33 @@ if __name__ == "__main__":
         os.makedirs(OUTPUT_DIR)
 
     #Extraction Phase
+    print("Extracting data...")
     extract_data("contacts", ALL_CONTACTS_VIEW_ID, OUTPUT_DIR)
-    extract_data("sales_accounts", ALL_ACCOUNTS_VIEW_ID, OUTPUT_DIR)
+    extract_sales_accounts(ALL_ACCOUNTS_VIEW_ID, OUTPUT_DIR)
     extract_data("deals", ALL_DEALS_VIEW_ID, OUTPUT_DIR)
 
     # Ingest and Transform Data Phase
-    contacts_data, deals_data, accounts_data = load_data_from_files(OUTPUT_DIR)
-    contacts_df, deals_df, accounts_df = transform_data(contacts_data, deals_data, accounts_data)
+    print("Transforming data...")
+    contacts_data, deals_data, accounts_data, accounts_contacts_data = load_data_from_files(OUTPUT_DIR)
+    contacts_df, deals_df, accounts_df, accounts_contacts_df, companies_df = transform_data(contacts_data, deals_data, accounts_data, accounts_contacts_data)
     contacts_df.to_csv("contacts.csv", index=False)
     deals_df.to_csv("deals.csv", index=False)
     accounts_df.to_csv("accounts.csv", index=False)
+    accounts_contacts_df.to_csv("accounts_contacts.csv", index=False)
+    companies_df.to_csv("companies.csv", index=False)
 
-    # # Aggregation Phase
-    # aggregated_metrics = calculate_aggregates(deals_df, contacts_df, accounts_df)
-    # contacts_per_account = generate_contacts_per_account(contacts_df)
+    # Load into PostgreSQL
+    print("Loading data to PostgreSQL...")
+    DB_NAME = os.getenv("POSTGRES_DB", "crm_db")
+    DB_USER = os.getenv("POSTGRES_USER", "crm_user")
+    DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "password")
+    DB_HOST = os.getenv("POSTGRES_HOST", "postgres")
+    DB_PORT = os.getenv("POSTGRES_PORT", "5432")
 
-    # # Print for Verification
-    # for agg_type, df in aggregated_metrics.items():
-    #     print(f"{agg_type}:")
-    #     print(df)
+    CONN_STRING = f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+    engine = sqlalchemy.create_engine(CONN_STRING)
 
-    # print("\nContacts Per Account:")
-    # print(contacts_per_account)
+    load_dataframe_to_postgres(contacts_df, "contacts", engine)
+    load_dataframe_to_postgres(deals_df, "deals", engine)
+    load_dataframe_to_postgres(accounts_df, "accounts", engine)
+    load_dataframe_to_postgres(companies_df, "contact_deal", engine)
