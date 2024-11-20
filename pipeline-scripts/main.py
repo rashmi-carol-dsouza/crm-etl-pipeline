@@ -3,7 +3,6 @@ import os
 from dotenv import load_dotenv
 from extract_data import extract_data, extract_sales_accounts
 from transform import load_data_from_files, transform_data
-from calculate_aggregations import calculate_aggregates, generate_contacts_per_account
 from load import load_dataframe_to_postgres
 from kpis import aggregate_deals_per_contact,aggregated_contacts_per_account,contacts_list
 
