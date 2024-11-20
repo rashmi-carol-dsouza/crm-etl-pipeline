@@ -5,6 +5,7 @@ from extract_data import extract_data, extract_sales_accounts
 from transform import load_data_from_files, transform_data
 from calculate_aggregations import calculate_aggregates, generate_contacts_per_account
 from load import load_dataframe_to_postgres
+from kpis import aggregate_deals_per_contact,aggregated_contacts_per_account,contacts_list
 
 
 load_dotenv()
@@ -36,6 +37,7 @@ if __name__ == "__main__":
     accounts_df.to_csv("accounts.csv", index=False)
     accounts_contacts_df.to_csv("accounts_contacts.csv", index=False)
     companies_df.to_csv("companies.csv", index=False)
+    print(companies_df)
 
     # Load into PostgreSQL
     print("Loading data to PostgreSQL...")
@@ -52,3 +54,11 @@ if __name__ == "__main__":
     load_dataframe_to_postgres(deals_df, "deals", engine)
     load_dataframe_to_postgres(accounts_df, "accounts", engine)
     load_dataframe_to_postgres(companies_df, "contact_deal", engine)
+
+    # Aggregation Phase
+    print("Calculating aggregated data...")
+    aggregate_deals_per_contact(engine)
+    aggregated_contacts_per_account(engine)
+    contacts_list(companies_df) 
+
+    print("Data pipeline completed successfully.")
