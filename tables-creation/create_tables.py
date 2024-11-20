@@ -25,95 +25,109 @@ cur = conn.cursor()
 # SQL to create tables
 create_accounts_table = """
 CREATE TABLE IF NOT EXISTS accounts (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+   id BIGINT PRIMARY KEY,
     address VARCHAR(255),
-    city VARCHAR(100),
-    state VARCHAR(100),
-    zipcode VARCHAR(20),
-    country VARCHAR(100),
-    number_of_employees INTEGER,
-    annual_revenue DECIMAL,
-    website VARCHAR(255),
-    phone VARCHAR(50),
-    open_deals_amount DECIMAL,
-    open_deals_count INTEGER,
-    won_deals_amount DECIMAL,
-    won_deals_count INTEGER,
-    industry VARCHAR(255),
-    region VARCHAR(100),
-    account_value DECIMAL,
+    annual_revenue DECIMAL(15, 2),
+    appointments TEXT,
+    avatar TEXT,
+    cf_account_value DECIMAL(15, 2),
+    cf_region VARCHAR(255),
+    city VARCHAR(255),
+    conversations TEXT,
+    country VARCHAR(255),
     created_at TIMESTAMP,
-    updated_at TIMESTAMP,
+    document_associations TEXT,
+    facebook VARCHAR(255),
+    is_deleted BOOLEAN,
     last_assigned_at TIMESTAMP,
-    custom_field JSONB,
-    tags VARCHAR(255),
-    team_user_ids VARCHAR(255),
-    domains VARCHAR(255)
+    linkedin VARCHAR(255),
+    name VARCHAR(255),
+    notes TEXT,
+    number_of_employees INTEGER,
+    open_deals_amount DECIMAL(15, 2),
+    open_deals_count INTEGER,
+    owner_id BIGINT,
+    phone VARCHAR(255),
+    record_type_id BIGINT,
+    state VARCHAR(255),
+    tasks TEXT,
+    twitter VARCHAR(255),
+    updated_at TIMESTAMP,
+    website VARCHAR(255),
+    won_deals_amount DECIMAL(15, 2),
+    won_deals_count INTEGER,
+    zipcode VARCHAR(255)
 );
 """
 
 create_contacts_table = """
 CREATE TABLE IF NOT EXISTS contacts (
-    id SERIAL PRIMARY KEY,
-    account_id INTEGER REFERENCES accounts(id),
-    first_name VARCHAR(100),
-    last_name VARCHAR(100),
-    display_name VARCHAR(255),
-    job_title VARCHAR(255),
-    city VARCHAR(100),
-    state VARCHAR(100),
-    country VARCHAR(100),
-    email VARCHAR(255),
-    mobile_number VARCHAR(50),
-    phone_numbers VARCHAR(255),
-    lead_score INTEGER,
-    open_deals_amount DECIMAL,
-    won_deals_amount DECIMAL,
-    lead_source VARCHAR(255),
-    last_contacted_date TIMESTAMP,
+avatar TEXT,
+    cf_last_contacted_date TIMESTAMP,
+    cf_lead_source VARCHAR(255),
+    city VARCHAR(255),
+    country VARCHAR(255),
     created_at TIMESTAMP,
-    updated_at TIMESTAMP,
+    customer_fit VARCHAR(255),
+    display_name VARCHAR(255),
+    email VARCHAR(255),
+    first_name VARCHAR(255),
+    id BIGINT PRIMARY KEY,
+    is_deleted BOOLEAN,
+    job_title VARCHAR(255),
     last_assigned_at TIMESTAMP,
-    custom_field JSONB,
-    tags VARCHAR(255),
-    team_user_ids VARCHAR(255),
-    subscription_status VARCHAR(100)
+    last_name VARCHAR(255),
+    lead_score INTEGER,
+    linkedin VARCHAR(255),
+    mcr_id VARCHAR(255),
+    mobile_number VARCHAR(255),
+    open_deals_amount DECIMAL(15, 2),
+    open_deals_count INTEGER,
+    record_type_id BIGINT,
+    sms_subscription_status VARCHAR(255),
+    state VARCHAR(255),
+    subscription_status VARCHAR(255),
+    subscription_types VARCHAR(255),
+    time_zone VARCHAR(255),
+    updated_at TIMESTAMP,
+    won_deals_amount DECIMAL(15, 2),
+    won_deals_count INTEGER
 );
 """
 
 create_deals_table = """
 CREATE TABLE IF NOT EXISTS deals (
-    id SERIAL PRIMARY KEY,
-    account_id INTEGER REFERENCES accounts(id),
-    name VARCHAR(255) NOT NULL,
-    amount DECIMAL,
-    base_currency_amount DECIMAL,
-    deal_size DECIMAL,
-    probability_of_closure DECIMAL,
-    deal_stage VARCHAR(255),
-    expected_close TIMESTAMP,
+    id BIGINT PRIMARY KEY,
+    age INTEGER,
+    amount DECIMAL(15, 2),
+    cf_deal_size VARCHAR(255),
+    cf_deal_stage VARCHAR(255),
+    cf_probability_of_closure DECIMAL(15, 2),
     closed_date TIMESTAMP,
-    deal_pipeline_id VARCHAR(100),
-    deal_stage_id VARCHAR(100),
     created_at TIMESTAMP,
-    updated_at TIMESTAMP,
+    deal_pipeline_id BIGINT,
+    deal_prediction VARCHAR(255),
+    deal_prediction_last_updated_at TIMESTAMP,
+    deal_stage_id BIGINT,
+    expected_close TIMESTAMP,
+    expected_deal_value DECIMAL(15, 2),
+    forecast_category VARCHAR(255),
+    has_products BOOLEAN,
     last_assigned_at TIMESTAMP,
-    deal_prediction JSONB,
-    deal_price_adjustments JSONB,
-    tags VARCHAR(255)
+    name VARCHAR(255),
+    probability DECIMAL(15, 2),
+    record_type_id BIGINT,
+    updated_at TIMESTAMP,
+    sales_account_id BIGINT,
+    FOREIGN KEY (sales_account_id) REFERENCES accounts(id)
 );
 """
 
-create_aggregated_metrics_table = """
-CREATE TABLE IF NOT EXISTS aggregated_metrics (
-    account_id INTEGER REFERENCES accounts(id),
-    aggregation_type VARCHAR(50) NOT NULL,
-    date DATE NOT NULL,
-    total_contacts INTEGER,
-    total_deals_amount DECIMAL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (account_id, aggregation_type, date)
+create_contact_deal_table = """
+CREATE TABLE IF NOT EXISTS contact_deal (
+    contact_id BIGINT PRIMARY KEY,
+    sales_account_id BIGINT,
+    FOREIGN KEY (sales_account_id) REFERENCES accounts(id)
 );
 """
 
@@ -121,7 +135,7 @@ CREATE TABLE IF NOT EXISTS aggregated_metrics (
 cur.execute(create_accounts_table)
 cur.execute(create_contacts_table)
 cur.execute(create_deals_table)
-cur.execute(create_aggregated_metrics_table)
+cur.execute(create_contact_deal_table)
 
 # Commit the changes and close the connection
 conn.commit()

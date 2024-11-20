@@ -1,5 +1,9 @@
 version: '3.8'
 
+networks:
+  crm_etl_pipeline:
+    driver: bridge
+
 services:
   postgres:
     image: postgres:latest
@@ -11,15 +15,28 @@ services:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -h ${POSTGRES_HOST} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - crm_etl_pipeline
 
   etl_pipeline:
     build: .
     volumes:
       - ./data:/app/data
+      - .:/app # mount the current directory to the container
     env_file:
       - .env
     depends_on:
       - postgres
+    networks:
+      - crm_etl_pipeline
 
 volumes:
   pgdata:
+
+networks:
+  crm_etl_pipeline:
